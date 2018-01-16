@@ -1,0 +1,110 @@
+Customize your Mainline or LTSI Linux Kernel Using the Yocto Project
+====================================================================
+- Kernel rcipes inherit kernel.bbclass
+- Adding a custom kernel is "easy" (supposedly)
+	- meta-skeleton/recipes-kernel/linux/linux-yocto-custom.bb (probably a good place to start)
+	- SRC_URI
+	- SRCREV_machine
+	- COMPATIBLE_MACHINE
+	- Provide a machine defconfig
+
+Complexities of the kernel
+- Security fixes
+- Bug fixes
+- Whiz-bang features
+- New target hardware
+- An explosion of linux-*.bb recipes, patch queues and defconfigs, etc.
+
+Try to organize all of this into two places
+- Security fixes, bug fixes and feature ports in common core
+- Differentiate where it matters. Policy is consistent with distro, keep machine specific pieces seperate.
+
+Components
+- Kernel class (meta/classes/kernel.bbclass)
+- Linux-Yocto recipe (meta/recipes-kernel/linux/linux-yocto*bb)
+- Linux-Yocto git repository
+	- http://git.yoctoproject.org/cgit/cgit.cgi/linux-yocto-4.1
+		- there are other kernel revs
+	- http://git.yoctoproject.org/cgit/cgit.cgi/yocto-kernel-cache
+		- has branch for each kernel version
+		- allows use of config frags to create config for any kernel
+- Kernel versions
+		linux-yocto: 3.14.39 (LTSI)
+		linux-yocto: 4.1.8
+		linux-yocto-dev: 4.3 (mainline)
+- Should probably choose standard/base kernel branch
+meta-data repo
+--------------
+yocto-kernel-cache
+	arch - architectures
+	backports - backports from newer releases
+	bsp - create machine info here
+	cfg - 
+	features - info for self contained kernel feature (leds, filesystems, subcomponents etc)
+	ktypes - kernel types (standard, pre-empt rt, tiny)
+	kver - kernel versions
+	patches - additional patches
+	scripts - scripts and tools
+	small - 
+	staging - 
+File types: .patches, .scc, cfg
+SCC File Type
+-------------
+KFEATURE_DESCRIPTION
+KFEATURE_COMPATIBILITY
+	all
+	arch
+	board
+kconf type
+	hardware
+	non-hardware
+patches
+can include other scc files
+
+SCC Example - defines what machine it is compatible with
+--------------------------------------------------------
+define KMACHINE common-pc
+define KMACHINE qemux86
+define KTYPE standard
+define KARCH i386
+
+include ktypes/standard/standard.scc
+include common-pc.scc
+
+# default policy for standard kernels
+include cfg/boot-live.scc
+include cfg/usb-mass-storage.scc
+include features/latencytop/latencytop.scc
+include features/profiling/profiling.scc
+include cfg/virtio.scc - for qemu
+include features/media/media-usb-webcams.scc
+include features/sound/snd_hda_intel.scc
+
+SCC Example - Feature
+---------------------
+define KFEATURE_DESCRIPTION "Enable USB-based Bluetooth hardware modules"
+define KFEATURE_COMPATIBILITY board -at board level
+
+include bluetooth.scc
+
+kconf hardware bluetooth-usb.cfg
+
+CFG File Type
+-------------
+standard kconfig format
+CONFIG_<ITEM>=y
+# CONFIG_<ITEM> is not set
+
+Using devtool
+-------------
+modify -x linux-yocto src/linux-yocto -x says extract, from linux-yocto in src/linux-yocto
+	adds layer to bblayers.conf
+	sets up a bbappend pointing to local src
+	creates a git source tree of upstream code
+build
+build-image
+update-recipe
+	creates a patch from modified source
+reset
+
+diffconfig will show what has changed in kernel config

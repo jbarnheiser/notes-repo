@@ -1,0 +1,8 @@
+related:<site>
+<search terms> filetype:<extension>
+<terms 1> [+-]<terms 2>
+"<phrase>" can have *
+<terms> nearby
+<terms> site:<site>
+allintitle: <terms>
+allinurl: <terms>

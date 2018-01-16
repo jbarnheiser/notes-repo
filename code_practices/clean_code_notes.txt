@@ -1,0 +1,25 @@
+Enterprise Programming Tricks For Clean Code
+============================================
+Some problems that exist
+------------------------
+Singleton Configuration
+Singletons
+Verbose Naming
+Noisy Logging
+Log and Throw
+Repetition and Duplication
+Unnecessary Code
+Mixed Levels of Abstraction
+Legacy Coding Habits
+Programming by Coincidence - sometimes things work and they shouldn't
+Programming by Superstition
+
+Not really necessary in variable names
+--------------------------------------
+object
+thing
+component
+part
+manager
+entity
+item

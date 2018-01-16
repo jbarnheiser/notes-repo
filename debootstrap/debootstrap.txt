@@ -1,0 +1,55 @@
+Build debian root file system using debootstrap
+debootstrap --arch=armhf –-foreign stretch <dir>
+- install qemu-user-static
+cp /usr/bin/qemu-arm-static <dir>/usr/bin/
+chroot <dir>
+./debootstrap/debootstrap --second-stage
+That’s all,
+
+
+
+Then you may add apt/sources.list and install what you need…
+apt-get install libgps-dev libmosquitto-dev g++ qt5-default
+
+On actual root filesystem
+-------------------------
+sudo apt-get install gksu
+create qtsu in /usr/bin
+#!/bin/bash
+gksu qtcreator
+
+create open-as-administrator in ~/.local/share/nautilus/scripts
+#!/bin/bash
+#
+# this code will determine exactly the path and the type of object,
+# then it will decide use gedit or nautilus to open it by ROOT permission
+#
+# Determine the path
+if [ -e -n $1 ]; then
+obj="$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS"
+else
+base="`echo $NAUTILUS_SCRIPT_CURRENT_URI | cut -d'/' -f3- | sed 's/%20/ /g'`"
+obj="$base/${1##*/}"
+fi
+# Determine the type and run as ROOT
+if [ -f "$obj" ]; then
+gksu gedit "$obj"
+elif [ -d "$obj" ]; then
+gksu nautilus "$obj"
+fi
+
+exit 0
+
+find qt in /usr/share/applications and open as root, change command to qtsu, add to launcher
+
+gnome-desktop-item-edit --create-new ~/Desktop
+
+
+To make a stretch fs image
+--------------------------
+dd if=/dev/zero of=<image file> bs=1M count=<number of MBs>
+mkfs.ext3 <image file>
+mount -o loop <image file> <mount location>
+cp -r <dir>/* <mount location>/
+sync
+umount <mount location>

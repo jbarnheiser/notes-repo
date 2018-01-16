@@ -1,0 +1,136 @@
+Yocto project has great documentation (supposedly)
+Images in tmp/deploy
+most stuff is in work
+work contains targets
+logs and run scripts go in temp dir of packages (build/tmp/work/<target>/<package>)
+bitbake -e <target> dumps the environment that bitbake uses to build target
+bitbake -e <target> | grep ^S= show where the source is
+bitbake -e <target> | grep ^WORKDIR= show where the working directory is
+bitbake -e <image-target> | grep ^IMAGE_FSTYPES= show what image types are being built
+bitbake-layers helps look at layers. Options: flatten help show-appends show-cross-depends show-layers show-overlayed show-recipes
+Use skeleton template when building recipes
+PR = package revision
+Recipes are in .bb files. .bbappend can alter a recipe without throwing it away.
+bb is a tool that helps examine dependencies
+bitbake-g will generate a package graph (can get messy)
+bb in github (kergoth)
+Yocto project reference manual has common variables defined.
+
+bitbake <image> build and image
+bitbake <package> -c <task> run a single task for a single recipe, use -P to profile command and save report
+bitbake <package> -c devshell enter a shell with the environment variables for the recipe
+bitbake <package> -c listtasks list the tasks defined in a .bb recipe
+bitbake <kernel-recipe-name> -c menuconfig launch kernel menuconfig
+bitbake-layers show-layers lists layers found based on bblayers.conf
+bitbake-layers show-recipes "*-image-*" lists recipes for a single image
+bitbake -e <package> prints environment variables for a recipe
+bitbake -v <package> verbose output
+bitbake <image> -g -u depexp show dependency viewer
+bitbake <image> -c populate_sdk compile the SDK installer
+bitbake -k <target> continues as long as possible when there is an error
+bitbake -n <target> dry run
+bitbake -s <target> show current and preferred versions of all recipes
+bitbake -l DEBUG_DOMAINS <target> show logging for specified debug domains
+
+
+Only have to git your meta layer
+work has build stuff
+work-shared is where kernel stuff is
+can use Narcissus with Angstrom
+
+Yocto Project Family
+--------------------
+Poky - Yocto project reference build system
+BitBake - Build engine
+Hob - Graphical User Interface for BitBake
+OpenEmbedded Core - Shared base layer of recipes and classes
+Application Development Toolkit (ADT) - Development environment for user-space applications to run on OS stacks built by Poky
+Eclipse IDE Plugin - Integration of ADT into the Eclipse IDE
+EGLIBC - Embedded variant of the GNU C library
+Matchbox - X Windows-based open source graphical UI for embedded devices
+Autobuilder - Automation for Yocto Project build tests and QA
+Build Appliance - Virtual machine image to try out the Yocto Project and Poky
+Pseudo - System administrator simulation environment
+Swabber - Host leakage detection tool
+
+Yocto Layers (top to bottom)
+----------------------------
+Developer-Specific Layer
+Commercial Layer (from OSV)
+UI-Specific Layer
+Hardware-Specific BSP
+Yocto-Specific Layer Metadata (meta-yocto)
+OpenEmbedded Core Metadata (oe-core)
+
+yocto layer tool can make a layer for you. Don't hack a package into a layer, just make one.
+Layers can extend, add, replace or modify recipes. Can add or replace bbclass files. Can add or modify configuration settings.
+Layers are added via BBLAYERS variable in build/conf/bblayers.conf
+Layers should be grouped by functionality: custom toolchains, distribution specifications, BSP/machine settings, functional areas (selinux, networking, etc) and project specific changes
+
+Configuration Files
+-------------------
+meta/conf/bitbake.conf (defaults) - hardly ever touch
+build/conf/bblayers.conf (layers) - includes all layers for build environment
+*/conf/layers.conf (one per layer)
+build/conf/local.conf (local user-defined) - # CPUs, target machine, distro, download dir, file paths, etc.
+meta-yocto/conf/distro/poky.conf (distribution policy)
+meta-yocto-bsp/conf/machine/beagleboard.conf (BSP)
+meta/conf/machine/include/tune-cortexa8.inc (CPU) - tuning perameters
+Recipes (metadata) - .bb and .bbappend
+
+Machine Configuration
+---------------------
+Specify kernel, bootloader settings
+git.yocto-project.org has many machine configurations
+can put dts files in here.
+
+Distro Policy
+-------------
+enable/disable LIBC and other features
+four predefined: poky-bleeding, poky, poky-lsb, poky-tiny
+
+bitbake can get sources from http, ftp, https, git, svn, perforce, mercurial, bzr, cvs, osc, repo, ssh and svk. Can deal with tarballs, zip, rar, xz, gz, bz2 and so on.
+
+toaster is a web GUI for bitbake
+
+From local.conf.sample
+----------------------
+check meta/classes/image.bbclass and meta/classes/core-image.bbclass for extra image configuration options
+can test booting virtual machine images under qemu. TEST_IMAGE = "1", see classes/testimage(-auto).bbclass for more info
+
+For package dependencies use RDEPENDS in a recipe. PACKAGES will list what packages the recipe generates.
+
+oe-pkgdata-util lookup-recipe <runtime package> [...] shows what recipe produces <runtime package>
+oe-pkgdata-util lookup-pkg <recipe-space package> shows what the runtime package will be
+oe-pkgdata-util lookup-pkg -r <runtime package> shows what the recipe-space package is
+oe-pkgdata-util list-pkgs [pattern] lists recipe-space packages that have been built (-u adds unpackaged packages)
+oe-pkgdata-util list-pkgs -r [pattern] lists runtime packages that have been built
+oe-pkgdata-util list-pkgs --recipe <recipe> lists packages built by recipe
+oe-pkgdata-util list-pkg-files <recipe-space package> list files included in recipe-space package
+oe-pkgdata-util list-pkg-files -r <runtime package> list files included in runtime package
+oe-pkgdata-util list-pkg-files --recipe <recipe> list packages produced by recipe (-u can include unpacked packages)
+oe-pkgdata-util package-info <pkg> [pkg ...] displays info on runtime package(s)
+oe-pkgdata-util package-info -f <FILE> reads package names from FILE, one per line
+oe-pkgdata-util find-path <target path> finds recipe-space package providing the specified target path, can use wild cards
+
+OpenEmbedded in the Real World
+------------------------------
+if single package build fails, try bitbake -c cleansstate and rebuild
+if sysroot or rootfs population fails, a brute force next step is to remove tmp and have it recreated from state cache
+
+devtool create-workspace <path> create workspace layer in path
+devtool add [recipe-name] srcuri creates a recipe for the code at srcuri, tries to detect name if not given
+devtool add -b srcuri create a recipe for a binary from srcuri e.g. RPMs
+devtool build <recipe> builds recipe up to and including do_populate_sysroot, do_packagedata
+devtool edit-recipe <recipe> opens EDITOR to edit recipe
+devtool finish <recipe> <dest> pushes committed changes to recipe to dest (layer) and removes it from workspace 
+devtool reset [-a] [recipe] remove recipe from workspace, -a removes all recipes
+devtool search <keyword> searches for target recipes matching recipe name, package name, description and installed files. Prints recipe name
+devtool upgrade <recipe> --version <new-version> upgrades an existing recipe to a newer version
+devtool deploy-target <recipe> root@<target> deploys recipe to target
+
+
+
+imx6ul-14x14-telematics.dtb add to compiled device trees in sources/meta-freescale/conf/machine/imx6ulevk.conf
+
+

@@ -1,0 +1,9 @@
+Canoe
+- Add a LDF file to have canoe generate the LIN network
+- CAN use generator as interactive scheduler for the bus
+- Trace window allows analysis of individual frames. LIN Extended gives you the most info
+- Trace shows errors, including Transmit Error (header only)
+- LIN Stress window will allow to send frames or errors
+- LIN Channel window gives statistics on a bus or nodes
+- Can make panels similar to how it's done in PCANExplorer
+- Network management window will show whether nodes are asleep or awake

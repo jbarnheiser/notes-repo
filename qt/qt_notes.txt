@@ -1,0 +1,31 @@
+From QtDD13 - Andy Nichols - Developing Embedded Linux Applications with Qt
+===========================================================================
+
+make xconfig is a Qt gui kernel editing option
+sysroot contains:
+-----------------
+development files
+include headers
+*.so files
+debug symbols
+
+mkspecs
+-------
+-platform - specifies platform of host machine (files found in gcc_64/mkspecs)
+-xplatform - specifies platform of target device
+-device - specifies specific device (available options found in gcc_64/mkspecs/devices)
+
+config instructions at about 34 minutes
+
+EGLFS Environment Variables
+---------------------------
+QT_QPA_EGLFS_HIDECURSOR - hides the cursor
+QT_QPA_EGLFS_PHYSICAL_{WIDTH/HEIGHT} - sets width and height of screen, Qt can usually not autodetect (mm)
+QT_QPA_EGLFS_{WIDTH/HEIGHT/DEPTH} - is actual resolution of frame buffer
+
+For new code AVOID these modules
+--------------------------------
+QtQuick1
+QtScript
+QtWidgets
+

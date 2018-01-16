@@ -1,0 +1,25 @@
+send an RTR can message with id 1, dlc 0 one time
+
+In linux/can.h the following CAN ID bits are flags: 31-extended format, 30-remote transfer request, 29-error frame.
+If bit 31 of the can id is 1, sllin_configure_frame_cache will be called.
+LIN ID is the 6 least significant bits of ID. Max of 0x3F.
+SLLIN_DATA_MAX = 8 bytes.
+mode bits: 3-setup with enhanced checksum, 2-setup with standard checksum, 0-setup as LIN response only.
+LIN does not work unless screen is ran before setting up the interface. Does not have to be at same baud as LIN bus. Kill screen processes before setting up LIN interface.
+SFF non-RTR with data will send whatever you set data to.
+If EFF non-RTR with LIN_CACHE_RESPONSE set is sent, whenever header is sent cached data will be sent.
+The settings that running screen changes are: stty -F /dev/ttymxc2 kill "^H" min 100 time 2 -hupcl brkint ignpar -icrnl -opost -onlcr -isig -icanon -echo
+
+with sllin.ko only one message can be sent. with sllin_bb.ko multiple messages can be sent but not using the cycle functions
+
+10/10/17
+=======
+Relearning this dahm driver. Note to self write better instructions.
+
+1. screen /dev/ttymxc2 19200
+2. ps -e | grep screen
+3. kill -9 <screen PIDs>
+4. /root/run.sh
+5. /opt/LINDemo/bin/LINDemo
+
+If you send the header for SLAVE_RESP_1, the connected gateway will send the data. Using sllin0.ko.

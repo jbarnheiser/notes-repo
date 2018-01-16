@@ -1,0 +1,185 @@
+========================================
+Setting outputs from u-boot source file.
+========================================
+printf("Turning off HS outputs...\n");
+gpio_request(198, "DIG_PIN_OUT1");
+gpio_direction_output(198, 0);
+gpio_request(199, "DIG_PIN_OUT2");
+gpio_direction_output(199, 0);
+gpio_request(167, "DIG_PIN_OUT3");
+gpio_direction_output(167, 0);
+gpio_request(200, "DIG_PIN_OUT4");
+gpio_direction_output(200, 0);
+
+==============================
+u-boot source file for display
+==============================
+/home/cpa/buildroot/output/build/uboot-rel_imx_4.1.15_2.0.0_ga/board/freescale/mx6display/mx6display.c
+
+===============================
+u-boot config files for display
+===============================
+/home/cpa/buildroot/output/build/uboot-rel_imx_4.1.15_2.0.0_ga/configs/mx6qdisplay_defconfig
+/home/cpa/buildroot/output/build/uboot-rel_imx_4.1.15_2.0.0_ga/configs/mx6solodisplay_defconfig
+
+====================
+Compile config file.
+====================
+cd /home/cpa/buildroot/output/build/uboot-rel_imx_4.1.15_2.0.0_ga
+make <config_file>
+
+===============
+Compile u-boot.
+===============
+cd <build_root_dir>
+make uboot-rebuild
+
+===============
+Compile kernel.
+===============
+cd <build_root_dir>
+make linux-rebuild
+
+=================
+Build File System
+=================
+cd <build_root_dir>
+make
+
+=========================
+Use menuconfig for kernel
+=========================
+cd <kernel_dir>
+make menuconfig CROSS_COMPILE="/home/cpa/buildroot/output/host/usr/bin/arm-buildroot-linux-gnueabihf-" ARCH=arm
+
+============
+Make modules
+============
+cd <build_root_dir>
+make linux-rebuild
+make
+
+====================================
+Make new package (NInvaders example)
+====================================
+mkdir package/ninvaders Make the directory for our package instructions
+make Config.in file for package
+===>
+config BR2_PACKAGE_NINVADERS
+	bool "ninvaders"
+	help
+	  This is a wonderful game.
+	  
+	  http://ninvaders.sourceforge.net/
+<===
+add package/ninvaders/Config.in to package/Config.in This will add the package to menuconfig, but it still won't do anything
+Make *.mk file for package
+===>
+################################################################################
+#
+# ninvaders
+#
+################################################################################
+
+NINVADERS_VERSION = 0.1.1
+NINVADERS_SITE = http://downloads.sourceforge.net/project/ninvaders/$(NINVADERS_VERSION)
+NINVADERS_SOURCE = ninvaders-$(NINVADERS_VERSION).tar.gz This is also the default format so you don't actually need it.
+
+$(eval $(generic-package))
+<===
+At this point buildroot will have what it needs to download the package, but it will not do anything for configuring, building or installing it.
+===>
+################################################################################
+#
+# ninvaders
+#
+################################################################################
+
+NINVADERS_VERSION = 0.1.1
+NINVADERS_SITE = http://downloads.sourceforge.net/project/ninvaders/$(NINVADERS_VERSION)
+NINVADERS_SOURCE = ninvaders-$(NINVADERS_VERSION).tar.gz
+
+define NINVADERS_BUILD_CMDS
+	@echo "Hello I'm building!"
+	$(TARGET_MAKE_ENV) $(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)
+endef
+
+define NINVADERS_INSTALL_TARGET_CMDS
+	@echo "Hello I'm installing!"
+endef
+
+$(eval $(generic-package))
+<===
+This will make the source but generate an error because it is missing a dependency. 
+TARGET_MAKE_ENV has environment variables for the target system
+TARGET_CONFIGURE_OPTS has CC and all necessary cross-compiler options as well as other make options like -I
+@D is the directory of the target (ninvaders)
+Edit Config.in for the package
+===>
+config BR2_PACKAGE_NINVADERS
+	bool "ninvaders"
+	select BR2_PACKAGE_NCURSES
+	help
+	  This is a wonderful game.
+	  
+	  http://ninvaders.sourceforge.net/
+<===
+Edit *.mk file
+===>
+################################################################################
+#
+# ninvaders
+#
+################################################################################
+
+NINVADERS_VERSION = 0.1.1
+NINVADERS_SITE = http://downloads.sourceforge.net/project/ninvaders/$(NINVADERS_VERSION)
+NINVADERS_SOURCE = ninvaders-$(NINVADERS_VERSION).tar.gz
+NINVADERS_DEPENDENCIES = ncurses
+
+define NINVADERS_BUILD_CMDS
+	@echo "Hello I'm building!"
+	$(TARGET_MAKE_ENV) $(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)
+endef
+
+define NINVADERS_INSTALL_TARGET_CMDS
+	@echo "Hello I'm installing!"
+endef
+
+$(eval $(generic-package))
+<===
+Now buildroot will build the dependencies and the package, but it will not install.
+Add install instructions
+===>
+################################################################################
+#
+# ninvaders
+#
+################################################################################
+
+NINVADERS_VERSION = 0.1.1
+NINVADERS_SITE = http://downloads.sourceforge.net/project/ninvaders/$(NINVADERS_VERSION)
+NINVADERS_SOURCE = ninvaders-$(NINVADERS_VERSION).tar.gz
+NINVADERS_DEPENDENCIES = ncurses
+
+define NINVADERS_BUILD_CMDS
+	@echo "Hello I'm building!"
+	$(TARGET_MAKE_ENV) $(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)
+endef
+
+define NINVADERS_INSTALL_TARGET_CMDS
+	@echo "Hello I'm installing!"
+	$(INSTALL) -D -m 0755 $(@D)/nInvaders $(TARGET_DIR)/usr/bin/nInvaders
+endef
+
+$(eval $(generic-package))
+<===
+This will install the package
+To apply patches while installing packages just put them in the package's folder.
+make legal-info will generate a document showing all component licenses
+To add package to that just add lines similar to the two below to the *.mk file
+NINVADERS_LICENSE = GPLv2+
+NINVADERS_LICENSE_FILES = nInvaders.c
+
+Use BR2_EXTERNAL to build packages outside of buildroot. This makes it easier to update buildroot. This will store defconfigs and packages. 
+See ELC 2015 - Buildroot: Embedded Linux for Small Devices & Makefile 30:00 for more.
