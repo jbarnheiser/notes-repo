@@ -108,3 +108,178 @@ update-recipe
 reset
 
 diffconfig will show what has changed in kernel config
+virtual/kernel can possibly save you from some issues, like overwriting another kernel if you're switching back and forth
+
+SCC file to do config and apply patch
+-------------------------------------
+devtool update-recipe -a <layer> linux-yocto - generates recipe to apply patch -a creates .bbappend
+change SRC_URI to "file://<name>.scc"
+vi <name>.scc
+lines in file
+-------------
+patch <patch>
+conf non-hardware <name>.cfg
+-------------
+vi <name>.cfg
+lines in file
+-------------
+CONFIG_YOCTO_<NAME>=m
+-------------
+kernel_configcheck regenerates the config file for the kernel
+bitbake linux-yocto -c kernel_configcheck
+
+Create new ktype
+----------------
+/meta-simple-ktype
+	conf
+		layer.conf
+	COPYING.MIT
+	README
+	recipes-kernel
+		linux
+			linux-yocto
+				simple-kernel-cache
+					bsp
+						common-pc
+							common-pc.scc
+					features
+						leds
+							leds.cfg
+							leds.scc
+					ktypes
+						basic
+							basic.cfg
+							basic.scc
+						simple
+							simple.scc
+		linux-yocto_4.%.bbappend
+		linux-yocto-simple
+linux-yocto_4.%.bbappend
+------------------------
+FILESEXTRAPATHS_prepend |= "${THISDIR"}/${PN}:"
+
+LINUX_KERNEL_TYPE = "simple"
+
+SRC_URI += "file://simple-kernel-cache":type=kmeta;destsuffix=simple-kernel-cache"
+------------------------
+simple.scc - modified copy of standard ktype
+--------------------------------------------
+# Include this kernel type fragment to get the standard features and configuration values.
+
+# Note: if only the features are desired, but not the configuration then this should be included as:
+#			include ktypes/standard/standard.scc nocfg
+#		if no chained configuration is desired, include it as:
+#			include ktypes/standard/standard.scc nocfg inherit
+
+include ktypes/basic/basic.scc
+branch standard
+
+kconf non-hardware ktypes/standard/standard.cfg
+
+include features/kgdb/kgdb.scc
+
+include features/firmware/firmware.scc
+
+include features/lttng/lttng.scc
+
+include features/blktrace/blktrace.scc
+
+include features/systemtap/systemtap.scc
+
+include features/utrace/utrace.scc
+
+include features/seccomp/seccomp.scc
+
+include arch/arm/arm.scc
+
+include arch/mips/mips.scc
+
+include arch/powerpc/powerpc.scc
+
+include arch/x86/x86.scc
+
+include features/hrt/hrt.scc
+include features/ftrace/ftrace.scc
+
+include features/uprobe/uprobe.scc
+
+include features/kprobes/kprobes.scc
+
+include patches/patches.scc
+
+include features/initramfs/initramfs.scc
+
+include features/yaffs2/yaffs2.scc
+include features/aufs/aufs.scc
+
+include features/cgroups/cgroups.scc
+
+include features/net_sched/net_sched.scc
+
+include features/kexec/kexec.scc
+
+#include features/ocf/ocf.scc
+include features/cryptodev/cryptodev.scc
+
+include features/vfat/vfat.scc
+
+include features/kvm/kvm.scc
+include features/tipc/tipc.scc
+
+include features/xip/xip.scc
+include features/oprofile/oprofile.scc
+
+include features/ramconsole/ramconsole.scc
+
+include features/vdso/vdso.scc
+
+include features/fuse/fuse.scc
+include features/serial/8250.scc
+include features/uptime/uptime.scc
+include features/ktest/ktest.scc
+include features/perf/perf.scc
+include features/input/input.scc
+
+include features/bfq.scc
+include backports/backports.scc
+
+# individual cfg block section
+include cfg/fs/devtmpfs.scc
+include cfg/fs/debugfs.scc
+include cfg/fs/btrfs.scc
+include cfg/fs/ext4.scc
+
+include cfg/net/ipsec.scc
+include cfg/net/ipv6.scc
+include cfg/net/ip_nf.scc
+include cfg/net/ip6_nf.scc
+include cfg/net/bridge.scc
+
+include cfg/systemd.scc
+
+include features/rfkill/rfkill.scc
+
+# include features/config_proc/config_proc.scc
+---------------------------------------------
+common-pc.scc
+-------------
+define KMACHINE common-pc - these fields are "scored" when building and the best match wins. so specify ktype
+define KMACHINE qemux86
+define KTYPE simple
+define KARCH i386
+
+include ktypes/simple/simple.scc
+
+include bsp/common-pc/common-pc.scc
+
+include features/leds/leds.scc
+
+# default policy for standard kernels
+include cfg/boot-live.scc
+include cfg/usb-mass-storage.scc
+include cfg/virtio.scc
+--------------
+
+KTYPE is added to build dir name, so you'll know you got it right
+
+
