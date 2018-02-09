@@ -1,0 +1,184 @@
+Yocto Project Developer's Day 2013 - Working with the Kernel
+============================================================
+Kernel Manual - http://www.yoctoproject.org/docs/latest/kernel-dev/kernel-dev.html
+Hands-on Kernel Lab - https://www.yoctoproject.org/sites/yoctoproject.org/files/elc2013-kernel-lab.pdf
+Yocto doesn't really have a kernel, but things you can add to a kernel (a meta-kernel)
+3 yocto kernel repos at any time - two versions and one dev
+LTSI kernels are merged into linux-yocto
+Other kernel recipes point to non-yocto kernel repos
+	linux-yocto-custom handles arbitrary git repos
+Traditional Kernel Recipe
+-------------------------
+Follows the typical oe-core recipe pattern
+	SRC_URI points to a kernel tarball
+	Patches added vi SRC_URI
+Inherits from kernel.bbclass
+Uses defconfig as the .config
+DESCRIPTION = <description>
+SECTION = "kernel"
+LICENSE = "GPLv2"
+
+LIC_FILES_CHKSUM = "file://<lic_file>;md5=<checksum>"
+
+inherit kernel
+
+SRC_URI = "${KERNELORG_MIRROR}/linux/kernel/v3.0/linux-${PV}.tar.bz2; \
+			name=kernel file://defconfig"
+SRC_URI += "file://<patch>"
+--------------------------
+Use bitbake -c menuconfig to configure kernel, copy .config to recipe's defconfig
+See lab 1 for worked example
+
+linux-yocto-custom Kernel Recipe
+--------------------------------
+SRC_URI points to a git clone and defconfig
+Enables config fragments (*.cfg)
+*.cfg example
+>>>>>>>>>>>>>
+CONFIG_SMP=y
+CONFIG_SCHED_SMT=y
+>>>>>>>>>>>>>
+Add .cfg file to SRC_URI
+Typically just a modified copy of linux-yocto-custom.bb, which is found in meta-skeleton/recipes-kernel/linux
+See lab 3 for worked example
+inherit kernel
+require recipes-kernel/linux/linux-yocto.inc
+
+SRC_URI = "git://git.kernel.org/pub/linux/kernel/git/stable/linux-stable.git; \
+			protocol=git;bareclone=1"
+
+SRC_URI += "file://defconfig file://smp.cfg"
+
+KBRANCH = "linux-3.4.y"
+
+LINUX_VERSION ?= "3.4.28"
+LINUX_VERSION_EXTENSION ?= "-custom"
+
+SRCREV="${AURTOREV}"
+
+PR = "r0"
+PV = "${LINUX_VERSION}+git${SRCPV}"
+
+COMPATIBLE_MACHINE_lab3-qemux86 = "lab3-qemux86"
+----------------------------------
+
+linux-yocto Kernel Recipe
+-------------------------
+Points to a yocto kernel repo
+Adds yocto kernel tooling and ready-to-use objects
+	Config fragments
+	Kernel features - Named config fragments + patches in .scc file
+Kernel types
+	Collections of objects defining common policy or capabilities
+SRC_URI points to git clone and 2 branches
+	machine branch - kernel source for one or more BSPs
+	meta branch - orphan branch containing shared objects
+		ready-to-use pool of config fragments and kernel features
+		BSP definitions (top-level kernel features)
+		Combined sum produces .config
+To add CONFIG_* add a .cfg to meta branch (preferred) or via SRC_URI
+To add patch add it directly to machine branch (preferred) or .scc file with patch command
+See lab 2 for worked example
+require recipes-kernel/linux/linux-yocto.inc
+
+KBRANCH_DEFAULT = "standard/base"
+KBRANCH = ${KBRANCH_DEFAULT}"
+
+SRCREV_machine ?= "13809f2cfd9be0ce86bd486e1643f9b90bed6f4f"
+SRCREV_meta ?= "f697e099bc76d5df3a307a5bc0cc25021dd6dfe0"
+
+SRC_URI = "git://git.yoctoproject.org/linux-yocto-3.4.git;protocol=git; \
+			bareclone=1;branch=${KBRANCH},${KMETA};name=machine,meta"
+			
+LINUX_VERSION ?= "3.4.28"
+
+PR = "${INC_PR}.3"
+PV = "${LINUX_VERSION}+git${SRCPV}"
+
+KMETA = "meta"
+
+COMPATIBLE_MACHINE = "qemuarm|qemux86|qemuppc|qemumips|qemux86-64"
+
+Normally modifiy via .bbappends
+Consider linux-yocto-3.4 bbappend, it overrides KBRANCH to make it BSP-specific and adds i915 kernel feature
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+
+COMPATIBLE_MACHINE_sugarbay = "sugarbay"
+
+MACHINE_sugarbay = "sugarbay"
+KBRANCH_sugarbay = "standard/common-pc-64/sugarbay"
+
+KERNEL_FEATURES_append_sugarbay += " features/i915/i915.scc"
+
+SRCREV_machine_pn-linux-yocto_sugarbay ?= "13809f2cfd9be0ce1643f9b90bed6f4f"
+SRCREV_meta_pn-linux-yocto_sugarbay ?= "f697e099bc76d5df3a3c25021dd6dfe0"
+
+LINUX_VERSION = "3.4.28"
+
+To add multiple meta branches:
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+
+SRC_URI += "git://git.yoctoproject.org/yocto-kernel-cache;protocol=git; \
+			branch=master;type=kmeta;name=feat1;destsuffix=kernel-cache/"
+SRC_URI += "git://${KSRC_linux_yocto_3_4};protocol=file;branch=meta; \
+			name=feat2;type=kmeta;destsuffix=kernel-features-experimental/"
+			
+SRCREV_feat1 = "${AUTOREV}"
+SRCREV_feat2 = "${AURTOREV}"
+
+KERNEL_FEATURES_append += " features/from_feat1/a_feature1_feature.scc"
+KERNEL_FEATURES_append += " features/from_feat2/a_feature2_feature.scc"
+-------------------------
+
+traditional - use with static tar balls
+linu-yocto-custom - if you have a tar ball based kernel or a git based kernel with defconfig
+linux-yocto - if you can move your kernel:
+	Continually updated with fixes
+	Direct access to config and feature pool
+	Do it all in recipe-space
+Use menuconfig, get diff of old config and new one, put that in the fragment
+
+Can use yocto-bsp to make create a meta layer for a new BSP
+Example generated kernel in recipe-space
+meat-<name>/recipe-kernel/
+	linux
+		files
+			<name>.cfg
+			<name>-preempt-rt.scc
+			<name>.scc
+			<name>-standard.scc
+		linux-yocto_3.4.bbappend
+Relevant parts of kernel recipe:
+KBRANCH_DEFAULT_<name> = "<chosen_machine_branch>/<name>"
+KBRANCH_<name> = "${KBRANCH_DEFAULT}"
+
+KMACHINE_<name> = "<name>"
+
+KERNEL_FEATURES_append_<name> += " cfg/smp.scc"
+
+SRC_URI += "file://<name>-standard.scc \
+			file://<name>.scc \
+			file://<name>.cfg \
+			file://<name>-user-config.cfg \
+			file://<name>-user-patches.scc"
+			
+Generated <name>-standard.scc:
+define KMACHINE <name>
+define KTYPE standard
+define KARCH arm
+
+include bsp/<branch>/<branch>-standard
+branch <name>
+
+include <name>.scc
+It's the top-level kernel feature defining the BSP, KARCH does not exist in repo.
+
+Can use local clones by specifying file protocol and 1 for bareclone for SRC_URI.
+SRC_URI = "git:///<file_path>/<repo>.git; \
+protocol=file;bareclone=1"
+Workflow:
+bare clone from repo
+clone bare clone into working repo
+make changes in working repo and commit to bare clone
+bitbake -c deploy <target>
+

@@ -1,0 +1,31 @@
+Yocto Project Extensible SDK: Simplifying the Workflow for Application Developers
+=================================================================================
+devtool sdk-update [url] - Updates the sdk to the current build made by your maintainer
+devtool search <package-name> - Searches for packages to use in SDK
+devtool sdk-install [-s] <recipe-name> - installs a package into your SDK -s downloads source if not already built
+docker container is available for the SDK. There is a talk about it that took place at the same conference as this video.
+bitbake <image-recipe> -c populate_sdk_ext - builds SDK and puts it in tmp/deploy/sdk
+Configuring SDK - can be done in local.conf
+---------------
+SDK_EXT_TYPE = "minimal" - make a minimal installer
+SDK_INCLUDE_TOOLCHAIN = "1" - add toolchain to minimal installer
+SDK_INCLUDE_PKGDATA = "1" - add all package info
+Add Specific Tool to SDK - also in conf
+------------------------
+SDK_EXTRA_TOOLS += "nativesdk-<package-name>"
+TOOLCHAIN_HOST_TASK += "<package-name>"
+
+Configuring the Updater
+-----------------------
+SDK_UPDATE_URL = "<url>" - Sets updater URL
+oe-publish-sdk tmp/deploy/sdk/installer.sh /path/to/sdk-updater - generates updater files
+
+Set Shared State Mirror
+-----------------------
+in conf/sdk-extra.conf
+SSTATE_MIRRORS = "file://.* http://mysite.com/sstate-cache/PATH"
+
+https://wiki.yoctoproject.org/wiki/Extensible_SDK
+
+update server can be as simple as Python-n HTTP server 8080
+

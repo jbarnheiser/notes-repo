@@ -1,0 +1,33 @@
+Embeded Recipes 2017 - Introduction to Yocto Project/OpenEmbedded
+=================================================================
+Machines can be found in conf/machine folders
+Distros can be found in conf/distro folders (check BSP layers for both machines and distros)
+Try to do as little as possible in local.conf
+yocto-layer create <layer_name> -o <dest_dir> - creates a layer
+Using git repos for source code keeps good record.
+Can make an image recipe, check recipes-core/images for examples
+Create a machine
+----------------
+meta-<bsp_name>/conf/machine/<machine_name>.conf contains hardware description
+use MACHINE = <machine_name> to set machine
+TARGET_ARCH - architecture being built for
+PREFEERRED_PROVIDER_virtual/kernel - the kernel recipe to use
+SERIAL_CONSOLE - speed and device for serial console to attach to
+KERNEL_IMAGETYPE - zImage etc.
+KERNEL_DEVICETREE - .dtb file
+Make a README file for your machine
+Example: conf/machine/fe-machine
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+require conf/machine/include/soc-family.inc
+require conf/machine/include/tune-cortexa5.inc
+
+TARGET_ARCH = "arm"
+
+PREFEERRED_PROVIDER_virtual/kernel ?= "linux-at91"
+PREFEERRED_PROVIDER_virtual/bootloader ?= "u-boot-at91"
+
+KERNEL_IMAGETYPE = "zImage"
+KERNEL_DEVICETREE = "at91-sama5d3_xplained.dtb"
+
+SERIAL_CONSOLE ?= "115200 ttyS0"
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
