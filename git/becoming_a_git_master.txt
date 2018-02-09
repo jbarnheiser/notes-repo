@@ -1,0 +1,34 @@
+Becoming a Git Master
+=====================
+look into using liquid prompt to show more info in shell
+use aliases that are stored in your .gitconfig file
+caa = commit -a --amend -C HEAD - ammend the last commit with everything uncommitted and new
+some alias examples are at http://bit.do/git-aliases
+git update-index --assume-unchanged <file> - different from .gitignore, it hides commited files. revert with --no-assume-unchanged
+git ls-files -v | grep ^h - list assumed unchanged files
+in merge ours = checked out code, theirs is from somewhere else
+if you want to use one file exclusively, use git checkout --ours/--theirs <file> and then git add <file>
+if you keep resolving same conflict over and over use git config --global rerere.enabled true - tells git to record repetative conflicts
+never rebase master
+use rebase on a branch where preferably only one person is working (like feature branches)
+rebase will slide commits and make merge easier
+interactive rebase lets you replay commits one by one. Can pick, squash, reword, fixup, edit or exec.
+git config --global rebase.autosquash treu will automatically modify the todo list of rebase --interactive
+start commits with squash!, fixup!, reword!, etc.
+only rewrite history of local branches
+git tag -s <tag_name> -m "message" - sign a tag with your GPG key. People will know that you really made the tag.
+git tag -v <tag_name> - verifies the signature is valid.
+Some GPG things
+---------------
+needs to be installed
+gpg --gen-key - generates your keys
+gpg -k - lists your keys
+gpg -a --export <keyid> exports your key
+
+gpg -a --export <keyid> | git hash-object -w --stdin - stores public key in a raw object. will be garbage collected without a tag. This is what kernel hackers use.
+git tag <tag_name> <raw_object> - tag raw object with a label
+git cat-file -p <tag_name> | gpg --import - import GPG key from tag for verification
+
+for dependencies, can use a dependency tool, git submodules or git subtrees
+check out http://bit.do/git-deps
+

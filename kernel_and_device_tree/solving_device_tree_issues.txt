@@ -1,0 +1,71 @@
+Tutorial: Solving Device Tree Issues - Frank Rowand
+===================================================
+node '/' used match a machine_desc entry
+other nodes are used to match a driver
+properties can have one, mutliple or no values. no values makes it like a bool (TRUE)
+"Device Tree For Dummies" by Thomas Pettazzoni is a good talk for device tree http://elinux.org/images/f/f9/Petazzoni-device-tree-dummies_0.pdf or youtube.
+overlays can be created for new hardware and be injected into the kernel at runtime. (was in progress as of video)
+dtdiff <device_tree>.dts <edt> - compares DT source to EDT (expanded device tree)
+dtdiff <device_tree>.dts <device_tree>.dtb - diff host device tree source with host .dtb
+dtdiff <device_tree>.dtb <fdt> - diff host.dtb with target FDT (can grab fdt from target system memory)
+dtdiff <fdt> <edt> - diff target FDT with target EDT
+dtdiff can compare device trees in various formats
+	source (.dts adn the .dtsi includes)
+	dtb (binary blob)
+	file system tree
+dtdiff can convert a dts file and its dtsi files into a single dts file, run it with one dts file to do this
+use dtc in ${KBUILD_OUTPUT}/scripts/dtc/dtc
+patches at http://elinux.org/Device_Tree_frowand http://elinux.org/images/a/a3/Dtdiff_add_cpp.patch
+DT fs trees are produced from /proc/device-tree and are not \n terminated, use diff -a or --text
+dtdiff sometimes hides information
+dtc -O dtb -I dts -o v1/test.dtb v1/test.dts - compile dts to dtb
+dtc -O dts -I dtb -o v1/dcmp.dts v1/test.dtb - decompile dtb to dts
+dtc replaces duplicates so dtdiff would not show this replacement. vimdiff test.dts dcmp.dts would
+dtc uses most recent instance to replace others.
+sometimes you need to dtdiff without sort (something may require something else to be defined first) use -u option to not sort
+dtdiff basically uses dtc, diff and sort to give you your output
+Where did that come from?
+	scan ${KBUILD_OUTPUT}/arch/${ARCH}/boot/dts/.XXX.dtb.dts.tmp (relates to XXX.dtb) from bottom to top. first appearance is where it was set.
+dtc --annotate -O dts -o ${KBUILD_OUTPUT}/arch/${ARCH}/boot/dts/.XXX.annotate.dts.tmp ${KBUILD_OUTPUT}/arch/${ARCH}/boot/dts/.XXX.dtb.dts.tmp
+	adds annotated file to show where stuff is
+
+DT Kernel Boot
+--------------
+extremely simplified boot
+>>>>>>>>>>>>>>>>>>>>>>>>>
+start_kernel()
+	pr_notice("%s", linux_banner)
+	setup_arch()
+		unflatten_device_tree()
+	pr_notice("Kernel command line: %s\n", ...)
+	init_IRQ()
+	...
+	time_init()
+	...
+	rest_init()
+		kernel_thread(kernel_init, ...)
+			kernel_init()
+				do_initcalls()
+					// device creation, driver binding
+<<<<<<<<<<<<<<<<<<<<<<<<<
+do_initcalls() creates devices, registers drivers and bind drivers to devices
+initcalls occur in this order: early, core, postcore, arch, subsys, fs, device and late
+
+dt_stat - script to create reports form /proc/device-tree and /sys/devices
+dt_node_info - packages info from dt_stat in a summary
+look at EDT
+	copy /proc/device-tree from target to base on host system
+	dtdiff base - decompile base
+
+Node not bound to a driver
+--------------------------
+check compatible in dts
+git grep for compatible entry
+look in Makefile in source directory for CONFIG object
+check for it in kernel .config
+dt_to_config is a proof of concept to try to automate this
+if not fixed, was the driver registered to boot
+have dynamic debug turned on
+check dmesg for driver and "add driver"
+can use printk to find things in the kernel
+	or trace_printk or kernel debugger breakpoint or kernel debugger tracepoint
