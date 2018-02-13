@@ -10,7 +10,7 @@ dtdiff <device_tree>.dts <device_tree>.dtb - diff host device tree source with h
 dtdiff <device_tree>.dtb <fdt> - diff host.dtb with target FDT (can grab fdt from target system memory)
 dtdiff <fdt> <edt> - diff target FDT with target EDT
 dtdiff can compare device trees in various formats
-	source (.dts adn the .dtsi includes)
+	source (.dts and the .dtsi includes)
 	dtb (binary blob)
 	file system tree
 dtdiff can convert a dts file and its dtsi files into a single dts file, run it with one dts file to do this
