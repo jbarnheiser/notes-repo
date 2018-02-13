@@ -5,9 +5,9 @@ other nodes are used to match a driver
 properties can have one, mutliple or no values. no values makes it like a bool (TRUE)
 "Device Tree For Dummies" by Thomas Pettazzoni is a good talk for device tree http://elinux.org/images/f/f9/Petazzoni-device-tree-dummies_0.pdf or youtube.
 overlays can be created for new hardware and be injected into the kernel at runtime. (was in progress as of video)
-dtdiff <device_tree>.dts <edt> - compares DT source to EDT (expanded device tree)
+dtdiff <device_tree>.dts <edt> - compares DT source to EDT (expanded device tree /proc/device-tree)
 dtdiff <device_tree>.dts <device_tree>.dtb - diff host device tree source with host .dtb
-dtdiff <device_tree>.dtb <fdt> - diff host.dtb with target FDT (can grab fdt from target system memory)
+dtdiff <device_tree>.dtb <fdt> - diff host.dtb with target FDT (can grab FDT from target system memory /sys/firmware/fdt)
 dtdiff <fdt> <edt> - diff target FDT with target EDT
 dtdiff can compare device trees in various formats
 	source (.dts and the .dtsi includes)
