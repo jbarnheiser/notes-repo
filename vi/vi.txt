@@ -1,0 +1,32 @@
+w - forward by words
+b - backward by words
+e - to end of words
+ge - backward to end of words
+f/F - find certain string in a line and go there
+t/T - until cerain string in a line
+. - repeat last command
+d - delete
+u - undo
+c - change (delete and enter insert mode)
+>/< - indent/outdent
+v - visually select
+y - yank (copy)
+i - inner (selects inside specified context)
+it - iiner tag
+ip - inner paragraph
+as - a sentence
+/ - search (can use with operations)
+n/N - repeat last find forward/backward
+#/* - find previous/next occurence of token under cursor
+'' - jump to the line you were just on
+o - open new line
+s - change character
+p/P - paste before/after cursor
+ctrl+r - redo
+a - can be used with commands like i, but inclusive
+hjkl - can be combined with commands
+HML - move to 'high' 'middle' or 'low' of screen
+look into using a fuzzy finder
+surround plugin?
+relative number helps with editing a number of lines (set relativenumber)
+set <no>nu <no>rnu

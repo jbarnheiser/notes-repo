@@ -1,0 +1,14 @@
+sudo !! - redo last command as root
+ctrl+x+e - open an editor to run a command (hit x then e)
+
+create a super fast ram disk
+----------------------------
+mkdir -p /mnt/ram
+mount -t tmpfs tmpfs /mnt/ram -o size=8192M
+
+ <command> - run a command without it going in history (doesn't work in all shells)
+fc - open last command in editor so you can fix it
+ssh -L <port>:<ip>:<port> <user>@<ip/domain> -N - create ssh tunnel
+use {} to make, move or copy multiple folders
+<command1> | tee -a <file> | <command2> - intercept stdout and put it in a file
+disown -a && exit - exit terminal but leave processes running

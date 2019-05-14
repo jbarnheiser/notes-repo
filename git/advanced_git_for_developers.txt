@@ -1,0 +1,8 @@
+-p option for add and reset allow individual selection of what to stage or unstage
+can fix conflicts in vi. search for ==== to find conflicts
+--no-ff keeps git from doing fast forward merge
+git difftool will use whatever your diff.tool is set to
+git submodule add <git_repo> <folder_for_repo> - clones git_repo into folder_for_repo as a submodule
+parent project can only see that something happened in submodule, doesn't know what it is.
+push submodule from inside submodule
+git <submodule_folder> update - updates submodule from remote

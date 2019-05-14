@@ -1,0 +1,19 @@
+compile with -g option
+start - start executing
+list - lists 10 instructions around PC
+step - execute instruction
+print <var> - show value of var
+next - like step but steps over sub routines
+x - like print but shows address of var and the raw memory (/nb examines n bytes, 1 is same as nothing)
+print &array and x can be used to examine arrays
+watch <var> sets watch point, shows old and new value when it changes
+rwatch <var> read watchpoint
+cont - continue
+break <line> - sets a breakpoint
+info <watch|break> - see set watch points and break points
+delete <num> - delete watch or break
+bt - show call frame
+list <call_id> - show code around call point
+frame <call_id> - specify which frame other commands are to be done in
+set var <var>=<value> - set var to value
+quit - exit gdb

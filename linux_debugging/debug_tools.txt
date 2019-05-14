@@ -1,0 +1,53 @@
+blktrace - make traces of i/o traffic on block devices
+bonnie++ - test hard drive performance
+cache-calibrator - analyze a computer's cache- memory system
+dhrystone - integer benchmark
+dmalloc - debug memory allocation library
+dropwatch - monitor and record packets dropped by the kernel
+dstat - view system resources in real time
+dt - data test program for testing operation of peripherals, file systems, device drivers or data streams
+duma - detect unintended memory access (overflow, underflow and leaks)
+fio - benchmark, stress test and verify i/o
+gdb - gnu debugger
+gdbserver - 
+google-breakpad - record crash data and send back to server
+iozone - file system benchmark tool
+kexec - loads another kernel and asks running kernel to do something with it
+ktap - trace the linux kernel dynamically
+latencytop - monitor process delays and resource availability issues
+lmbench - suite of microbenchmarks for UNIX/POSIX
+lsof - lists opened files
+ltp-testsuite - test suite for linux
+ltrace - records library calls and signals received by a process
+lttng-babeltrace - trace read and write libraries
+lttng-modules - modules for the lttng kernel tracing infrastructure
+lttng-tools - user space utilities for the lttng tracing infrastructure
+memstat - lists processes, executables and libraries using virtual memory
+netperf - network performance benchmark tool
+netsniff-ng - network analyzer and tool kit
+oprofile - system-wide profiler capable of profiling all running code
+pax-utils - ELF utils for security relivent properties
+pv - monitor data through a pipeline
+ramspeed/smp - measure cache and memory performance of multi-processor machines
+ramspeed - measure cache and memory performance
+rt-tests - tests real time behavior of a linux system
+spidev_test - tests SPI
+strace - tracks system calls of a running program
+stress - imposes configurable amount of stress on cpu, memory, i/o and disk
+stress-ng - stresses various subsystems and kernel interfaces
+sysdig - captures system state and activity
+tinymembench - measure memory bandwidth
+trace-cmd - command line reader for ftrace
+trinity - linux system call fuzz tester
+uclibc-ng-test - test uclibc-ng library
+valgrind - debug and profile linux programs
+whetstone - double precision benchmark
+
+objdump - exposes contents of binaries
+
+Yocto ptest - https://wiki.yoctoproject.org/wiki/Ptest
+Fuego - https://fuegotest.org/wiki/FrontPage https://fuegotest.org/wiki/Fuego_Quickstart_Guide
+LAVA - https://validation.linaro.org/static/docs/v2/ https://github.com/kernelci/lava-docker
+KernelCI - visualization of test results https://github.com/kernelci/kernelci-docker https://github.com/kernelci/kernelci-admin https://powerci.org
+labgrid - https://labgrid.readthedocs.io/en/latest/ https://github.com/labgrid-project
+r4d - 

@@ -1,0 +1,32 @@
+systemctl - query or send control commands to the systemd manager
+	--reverse
+	--no-pager
+	--output="short, short-precise, short-iso, short-full, short-monotonic, short-unix, verbose, export, json, json-pretty, json-sse, cat"
+	list-units
+	list-timers
+	list-sockets
+	show
+	list-dependencies
+	list-unit-files
+	list-jobs
+systemd-analyze - profile systemd, show unit dependencies and check unit files
+systemd-ask-password - query the user for a system passphrase, via the TTY or an UI agent
+systemd-cat - execute process with stdout/stderr connected to the journal
+systemd-cgls - recursively show control group contents
+systemd-cgtop - show top control groups by their resource usage
+systemd-delta - find overridden configuration files
+systemd-detect-virt - detect execution in a virtualized environment
+systemd-escape - show system and user paths
+systemd-hwdb - update or query the hardware database
+systemd-inhibit - execute a process while inhibiting shutdown/sleep/idle
+systemd-machine-id-setup - initialize /etc/machine-id from a random source
+systemd-mount - establish a mount or auto-mount point transiently
+systemd-notify - notify the init system about service status updates
+systemd-nspawn - spawn a minimal namespace container for debugging, testing and building
+systemd-path - show system and user paths
+systemd-resolve - resolve domain names, IPv4 and IPv6 addresses, DNS records and services
+systemd-run - run the specified command in a transient scope or service
+systemd-socket-activate - listen on sockets and launch child on connection
+systemd-stdio-bridge - stdio or socket-activatable proxy to a given DBus endpoint
+systemd-tmpfiles - creates, deletes and cleans up volatile and temporary files and directories
+systemd-tty-ask-password-agent - process system password requests

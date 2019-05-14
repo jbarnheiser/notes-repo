@@ -1,0 +1,173 @@
+Tutorial: Debugging Custom Hardware with Linux - Tools to Make Your Hardware Engineers Love You
+===============================================================================================
+Simple Observation/Querying Tools
+	files in /proc, /sys and debugfs
+	devmem
+	strace
+	and many more...
+Advanced Debug, Trace & Throughput Tools
+	GDB
+	Eclipse
+	LTTng
+	FIO
+Procfs Virtual Filesystem - /proc
+	/proc/interrupts, /proc/irq - system interrupt information
+	/proc/iomem - memory map
+	/proc/modules - info on kernel modules, similar to "lsmod"
+	/proc/sys/kernel/tainted - kernel tainted info
+	/proc/meminfo - information about memory usage, both physical and swap
+	/proc/cmdline - kernel command line
+	/proc/cpuinfo - information about the processor
+	/proc/filesystems - filesystem information supported by kernel
+	/proc/<pid>/cmdline - command line arguments passed to the <pid> process
+	/proc/<pid>/mem - memory held by the process
+	/proc/<pid>/maps - memory maps to executables and library files
+	/proc/<pid>/status - status of the process
+	/proc/<pid>/environ - environment variables
+	/proc/<pid>/fd - contains the file descriptors which is linked to the appropriate files
+	/proc/<pid>/limits - contains the information about the specific limits to the process
+	/proc/<pid>/mounts - mount related information
+	more info in kernel source/Documentation/filesystems/proc.tx http://www.tldp.org/LDP/Linux-Filesystem-Hierarchy/html/proc.html
+Sysfs Virtual Filesystem - /sys
+	/sys/module
+	/sys/module/<name>/parameters
+	/sys/bus/platform/devices
+	/sys/bus/platform/drivers/<name>/bind
+	/sys/bus/platform/drivers/<name>/unbind
+	useful once kernel module created
+	can create virtual files to read and write
+	more info https://www.kernel.org/doc/Documentation/filesystems/sysfs.txt
+Debugfs Virtual Filesystem - /sys/kernel/debug
+	enable with:
+		Kernel Hacking
+			CONFIG_DEBUG_FS=y
+		ftrace
+			CONFIG_FUNCTION_TRACER=y
+			CONFIG_FUNCTION_GRAPH_TRACER=y
+			CONFIG_STACK_TRACER=y
+			CONFIG_DYNAMIC_FTRACE=y
+	/sys/kernel/debug/tracing
+	/sys/kernel/debug/tracing/events/*/enable
+	/sys/kernel/debug/tracing/events/*/filter
+	/sys/kernel/debug/tracing/set_event
+	more info: https://www.kernel.org/doc/Documentation/filesystems/debugfs.txt
+devmem
+	read/write one memory location
+	could use a script
+		dump addresses 0xFFFF_0000 to 0xFFFF_00FC
+			for i in `seq 4294901760 4 4294902015`;
+			do
+				devmem $i 32;
+			done
+		fill addresses 0xFFFF_0000 to 0xFFFF_00FC
+			for i in `seq 4294901760 4 4294902015`;
+			do
+				j=`dd if=/dev/urandom bs=4 count=1 | hexdump -e '"0x%04x"'`
+				devmem $i 32 $j;
+			done
+/dev/mem Alternatives
+	Crash - unrestricted /dev/crash
+		http://people.redhat.com/anderson/
+	fmem - unrestricted /dev/fmem
+		http://hysteria.cz/niekt0/fmem
+	pmem - unrestricted /dev/pmem
+		http://www.rekall-forensic.com
+	LIME - Linux Memory Extractor
+		https://github.com/504ensicslabs/lime
+	KDB - mdp command
+		CONFIG_FRAME_POINTER=y
+		CONFIG_KGDB=y
+		CONFIG_KGDB_SERIAL_CONSOLE=y
+		CONFIG_KGDB_KDB=y
+		CONFIG_KDB_KEYBOARD=y
+		Kdb command to dump physical memory
+Other Debug Command Line Tools
+	strace - display system calls used by any executable
+	readelf - display information about the contents of ELF format files
+	ldd - prints shared library dependencies
+	LD_DEBUG environment variable
+	nm - prints symbol table
+	dmesg - print or control the kernel ring buffer
+	lsof - list open files by directory, by pid or by socket
+	iostat - monitor io devices such as disks
+	Memory
+		free - physical and swap memory info
+		vmstat - virtual memory statistics
+		pmap - displays process memory map
+	Processes
+		top
+		ps
+strace
+	strace -e <syscall> - filters particular system calls
+	warning: slower performance
+	example
+	>>>>>>>
+	strace ls
+	execve("/bin/ls", ["ls"], [/* 21 vars */]) = 0
+	brk(0) = 0x8c31000
+	access("/etc/ld.so.nohwcap", F_OK) = -1 ENOENT (No such file or directory)
+	mmap2(NULL, 8192, PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb78c7000
+	access("/etc/ld.so.preloar", R_OK) = -1 ENOENT (No such file or directory)
+	open("/etc/ld.so.cache", O_RONLY) = 3
+	fstat64(3, {st_mode=S_IFREG|0644, st_size=65354, ...}) = 0
+	<<<<<<<
+Ethernet, PCIe, USB
+	Ethernet
+		netstat
+		tcpdump
+		iftop
+		route
+		ss
+		vnstat
+		ntop
+	PCIe
+		lspci -vw -- show/enumerate devices, device cfg with -x
+		PCI Utilities & IDs: http://mj.ucw.cz/pciutils.html
+	USB
+		lsusb -v
+		usbmon
+GNU Debugger - GDB
+	allows you to see what a program is doing while it's running or what another program was doing when it crashed
+	commands
+		break <location> - set breakpoint
+		continue - continue executing program
+		del - delete breakpoint, tracepoint
+		bt - back trace
+		step # - single step, can step # times
+		next - step over subroutines
+		list - list source code by line number or function name
+		disas <function> - show disassembly for function
+		catch <event> - GDB stops when event occurs
+		watch <expr> - GDB stops when expr changes
+		more info: https://www.gnu.org/software/gdb/
+Tracing tools - LTTng
+	Open source tracing framework
+	works in kernel space and user space
+		has kernel modules, user space library and tools
+	command line tools
+		lttng
+		Babeltrace
+	Tracer Alternatives
+		ftrace - Linux kernel internal tracer
+		perf - Linux profiling with performance counters
+		SystemTap
+		Ktap - script-based dynamic tracing
+		Dtrace4linux
+		Sysdig
+Flexible I/O Tester - FIO
+	used for stress testing
+		bandwidth limits and latencies
+	works with block devices and virtual files
+	uses sync, mmmap, libaio, posixaio and more (i/o engines)
+Other useful debug tools
+	On chip debugger vi JTAG (http://openocd.org)
+	rr - replay debug sessions
+	Valgrind - mem, cache, thread debugging
+Tips
+	use /dev/urandom for random data
+	use hexdump to format data
+	use tail -f | less (press 'F') to follow log file in real time
+	use watch for repeatedly openning and catting files, good for files in proc
+Can monitor interrupts or GPIO status
+	watch -n 0 cat /proc/interrupts
+	watch -n 0 cat /sys/kernel/debug/gpio
